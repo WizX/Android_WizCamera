@@ -1,10 +1,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-
     package="com.wizcamera">
 
-    <application android:allowBackup="true" android:label="@string/app_name"
-        android:supportsRtl="true">
+    <uses-permission android:name="android.permission.CAMERA" />
 
-    </application>
+    <!--AndroidManifest.xml中的uses-feature : http://blog.csdn.net/cao478208248/article/details/22931773-->
+    <uses-feature android:name="android.hardware.camera" />
+    <!--该应用程序使用设备相机的自动对焦能力。-->
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+    <!--该应用程序使用设备上的前置摄像头。-->
+    <uses-feature
+        android:name="android.hardware.camera.front"
+        android:required="false" />
+    <!--该应用程序使用设备相机的闪光灯。-->
+    <uses-feature
+        android:name="android.hardware.camera.flash"
+        android:required="false" />
+
+    <application />
 
 </manifest>
