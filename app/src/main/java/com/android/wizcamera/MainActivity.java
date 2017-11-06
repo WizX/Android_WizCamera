@@ -17,7 +17,9 @@
 package com.android.wizcamera;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,6 +27,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.media.ExifInterface;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -35,16 +38,23 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-
+import com.android.wizcamera.utils.DimensUtil;
+import com.android.wizcamera.utils.FileUtil;
 import com.wizcamera.AspectRatio;
 import com.wizcamera.CameraView;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 
@@ -94,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                         mCameraView.takePicture();
                     }
                     break;
-                    default:
-                        break;
+                default:
+                    break;
             }
         }
     };
@@ -109,9 +119,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             mCameraView.addCallback(mCallback);
         }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.take_picture);
-        if (fab != null) {
-            fab.setOnClickListener(mOnClickListener);
-        }
+        fab.setOnClickListener(mOnClickListener);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -123,19 +131,36 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onResume() {
         super.onResume();
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            try {
+        List<String> permissions = new ArrayList<>();
+        permissions.add(Manifest.permission.CAMERA);
+        permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        try {
+            if (checkPermission(permissions)) {
                 mCameraView.start();
-            } catch (Exception e) {
-                Log.e(TAG, "start camera fail", e);
             }
-        } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-            ConfirmationDialogFragment.newInstance(R.string.camera_permission_confirmation,
-                    new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION, R.string.camera_permission_not_granted)
-                    .show(getSupportFragmentManager(), FRAGMENT_PERMISSION);
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+        } catch (Exception e) {
+            Log.e(TAG, "start camera fail", e);
         }
+    }
+
+    private boolean checkPermission(List<String> permissions) {
+        if (permissions == null || permissions.size() == 0) {
+            return true;
+        }
+        int count = 0;
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
+                count++;
+            } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                ConfirmationDialogFragment.newInstance(R.string.camera_permission_confirmation,
+                        new String[]{permission}, REQUEST_CAMERA_PERMISSION, R.string.camera_permission_not_granted)
+                        .show(getSupportFragmentManager(), FRAGMENT_PERMISSION);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_CAMERA_PERMISSION);
+            }
+        }
+        Log.e(TAG, "checkPermission:" + count);
+        return count == permissions.size();
     }
 
     @Override
@@ -145,7 +170,6 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         } catch (Exception e) {
             Log.e(TAG, "stop camera fail", e);
         }
-
         super.onPause();
     }
 
@@ -175,8 +199,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 }
                 // No need to start camera here; it is handled by onResume
                 break;
-                default:
-                    break;
+            default:
+                break;
         }
     }
 
@@ -189,6 +213,13 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.custom_aspect_ratio:
+                Toast.makeText(this, "custom aspect ratio", Toast.LENGTH_SHORT).show();
+                int displayW = DimensUtil.getDisplayWidth(this);
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mCameraView.getLayoutParams();
+                params.height = displayW * 4 / 3;
+                mCameraView.setLayoutParams(params);
+                break;
             case R.id.aspect_ratio:
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 if (mCameraView != null && fragmentManager.findFragmentByTag(FRAGMENT_PERMISSION) == null) {
@@ -254,35 +285,67 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
         @Override
         public void onPictureTaken(CameraView cameraView, final byte[] data) {
-            Log.d(TAG, "onPictureTaken " + data.length);
-            Toast.makeText(cameraView.getContext(), R.string.picture_taken, Toast.LENGTH_SHORT).show();
-            getBackgroundHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    long time = System.currentTimeMillis();
-                    File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), String.format("picture_%s.jpg", String.valueOf(time)));
-                    OutputStream os = null;
-                    try {
-                        os = new FileOutputStream(file);
-                        os.write(data);
-                        os.close();
+            producePicture2(data);
+        }
+    };
 
-                        PictureDialogFragment.newInstance(file.getAbsolutePath()).show(getSupportFragmentManager(), FRAGMENT_PICTURE);
-                    } catch (IOException e) {
-                        Log.w(TAG, "Cannot write to " + file, e);
-                    } finally {
-                        if (os != null) {
-                            try {
-                                os.close();
-                            } catch (IOException e) {
-                                // Ignore
-                            }
+    private void producePicture1(final byte[] data) {
+        Log.d(TAG, "onPictureTaken " + data.length);
+        Toast.makeText(this, R.string.picture_taken, Toast.LENGTH_SHORT).show();
+        getBackgroundHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                long time = System.currentTimeMillis();
+                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), String.format("picture_%s.jpg", String.valueOf(time)));
+                OutputStream os = null;
+                try {
+                    os = new FileOutputStream(file);
+                    os.write(data);
+                    os.close();
+                    PictureDialogFragment.newInstance(file.getAbsolutePath()).show(getSupportFragmentManager(), FRAGMENT_PICTURE);
+                    Log.e(TAG, "file size:" + file.length() + ",getAbsolutePath:" + file.getAbsolutePath());
+                } catch (IOException e) {
+                    Log.w(TAG, "Cannot write to " + file, e);
+                } finally {
+                    if (os != null) {
+                        try {
+                            os.close();
+                        } catch (IOException e) {
+                            // Ignore
                         }
                     }
                 }
-            });
-        }
+            }
+        });
+    }
 
-    };
+    public void producePicture2(final byte[] jpeg) {
+        getBackgroundHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                OutputStream os = null;
+                File file = null;
+                try {
+                    File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "wizcamera");
+                    FileUtil.createDir(directory);
+                    file = FileUtil.generateName(directory);
+                    os = new FileOutputStream(file);
+                    os.write(jpeg);
+                    os.close();
 
+                    MainActivity.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+
+                    PictureDialogFragment.newInstance(file.getAbsolutePath()).show(getSupportFragmentManager(), FRAGMENT_PICTURE);
+                    Log.e(TAG, "file size:" + file.length() + ",getAbsolutePath:" + file.getAbsolutePath());
+                } catch (Exception e) {
+                    Log.w(TAG, "--> Cannot write to " + (file == null ? "" : file.getAbsolutePath()) + e);
+                } catch (Error error) {
+                    Log.w(TAG, "--> Cannot write to " + (file == null ? "" : file.getAbsolutePath()) + error);
+                    System.gc();
+                } finally {
+                 FileUtil.   closeQuietly(os);
+                }
+            }
+        });
+    }
 }
