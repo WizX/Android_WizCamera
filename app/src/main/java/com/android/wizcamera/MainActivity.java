@@ -43,6 +43,7 @@ import android.widget.Toast;
 
 import com.android.wizcamera.utils.DimensUtil;
 import com.android.wizcamera.utils.FileUtil;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.wizcamera.AspectRatio;
 import com.wizcamera.CameraView;
 
@@ -134,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         List<String> permissions = new ArrayList<>();
         permissions.add(Manifest.permission.CAMERA);
         permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        permissions.add(Manifest.permission.READ_PHONE_STATE); //bugly
         try {
             if (checkPermission(permissions)) {
                 mCameraView.start();
