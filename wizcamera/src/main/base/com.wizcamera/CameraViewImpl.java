@@ -57,10 +57,13 @@ abstract class CameraViewImpl {
 
 
     /**
-     * 抽象方法
+     * 启动相机
      */
     abstract boolean start();
 
+    /**
+     * 停止使用相机，并销毁相机资源
+     */
     abstract void stop();
 
     abstract boolean isCameraOpened();

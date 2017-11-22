@@ -27,35 +27,39 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.media.ExifInterface;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.wizcamera.utils.DimensUtil;
 import com.android.wizcamera.utils.FileUtil;
-import com.tencent.bugly.crashreport.CrashReport;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.wizcamera.AspectRatio;
 import com.wizcamera.CameraView;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 
@@ -63,7 +67,7 @@ import java.util.Set;
  * This demo app saves the taken picture to a constant file.
  * $ adb pull /sdcard/Android/data/com.google.android.cameraview.demo/files/Pictures/picture.jpg
  */
-public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, AspectRatioFragment.Listener {
+public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, AspectRatioFragment.Listener, View.OnClickListener {
 
     private static final String TAG = "MainActivity";
 
@@ -96,37 +100,37 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
 
     private Handler mBackgroundHandler;
 
-    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.take_picture:
-                    if (mCameraView != null) {
-                        mCameraView.takePicture();
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
+
+    private DrawerLayout drawer;
+    private SimpleDraweeView sdvCurPicture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         mCameraView = (CameraView) findViewById(R.id.camera);
         if (mCameraView != null) {
             mCameraView.addCallback(mCallback);
         }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.take_picture);
-        fab.setOnClickListener(mOnClickListener);
+        fab.setOnClickListener(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowTitleEnabled(false);
         }
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        findViewById(R.id.left_drawer).setOnClickListener(this);
+        sdvCurPicture = (SimpleDraweeView) findViewById(R.id.cur_picture);
+        sdvCurPicture.setOnClickListener(this);
     }
 
     @Override
@@ -173,6 +177,15 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             Log.e(TAG, "stop camera fail", e);
         }
         super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -290,36 +303,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             producePicture2(data);
         }
     };
-
-    private void producePicture1(final byte[] data) {
-        Log.d(TAG, "onPictureTaken " + data.length);
-        Toast.makeText(this, R.string.picture_taken, Toast.LENGTH_SHORT).show();
-        getBackgroundHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                long time = System.currentTimeMillis();
-                File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), String.format("picture_%s.jpg", String.valueOf(time)));
-                OutputStream os = null;
-                try {
-                    os = new FileOutputStream(file);
-                    os.write(data);
-                    os.close();
-                    PictureDialogFragment.newInstance(file.getAbsolutePath()).show(getSupportFragmentManager(), FRAGMENT_PICTURE);
-                    Log.e(TAG, "file size:" + file.length() + ",getAbsolutePath:" + file.getAbsolutePath());
-                } catch (IOException e) {
-                    Log.w(TAG, "Cannot write to " + file, e);
-                } finally {
-                    if (os != null) {
-                        try {
-                            os.close();
-                        } catch (IOException e) {
-                            // Ignore
-                        }
-                    }
-                }
-            }
-        });
-    }
+    private String curPicturePath;
 
     public void producePicture2(final byte[] jpeg) {
         getBackgroundHandler().post(new Runnable() {
@@ -336,18 +320,49 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                     os.close();
 
                     MainActivity.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+                    curPicturePath = file.getAbsolutePath();
+                    final File finalFile = file;
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sdvCurPicture.setImageURI(Uri.fromFile(finalFile));
+                        }
+                    });
 
-                    PictureDialogFragment.newInstance(file.getAbsolutePath()).show(getSupportFragmentManager(), FRAGMENT_PICTURE);
-                    Log.e(TAG, "file size:" + file.length() + ",getAbsolutePath:" + file.getAbsolutePath());
+//                    PictureDialogFragment.newInstance(file.getAbsolutePath()).show(getSupportFragmentManager(), FRAGMENT_PICTURE);
+                    Log.e(TAG, "file size:" + file.length() + ",getAbsolutePath:" + file.getAbsolutePath() + ",Thread:" + Thread.currentThread().getName());
                 } catch (Exception e) {
                     Log.w(TAG, "--> Cannot write to " + (file == null ? "" : file.getAbsolutePath()) + e);
                 } catch (Error error) {
                     Log.w(TAG, "--> Cannot write to " + (file == null ? "" : file.getAbsolutePath()) + error);
                     System.gc();
                 } finally {
-                 FileUtil.   closeQuietly(os);
+                    FileUtil.closeQuietly(os);
                 }
             }
         });
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.cur_picture:
+                if (TextUtils.isEmpty(curPicturePath)) {
+                    Toast.makeText(MainActivity.this, "请拍照", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                }
+                Intent intent = new Intent(MainActivity.this, PicturePreviewActivity.class);
+                intent.putExtra(PicturePreviewActivity.PICTURE_PATH, curPicturePath);
+                startActivity(intent);
+                break;
+            case R.id.take_picture:
+                if (mCameraView != null) {
+                    mCameraView.takePicture();
+                }
+                break;
+        }
     }
 }

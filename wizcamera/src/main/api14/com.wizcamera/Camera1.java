@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.util.SparseArrayCompat;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
@@ -181,7 +182,7 @@ class Camera1 extends CameraViewImpl {
                 ratiosToDelete.add(aspectRatio);
             }
         }
-        for (AspectRatio ratio: ratiosToDelete) {
+        for (AspectRatio ratio : ratiosToDelete) {
             idealAspectRatios.remove(ratio);
         }
         return idealAspectRatios.ratios();
@@ -384,7 +385,11 @@ class Camera1 extends CameraViewImpl {
         }
 
         adjustCameraParameters();
-        mCamera.setDisplayOrientation(calcDisplayOrientation(mDisplayOrientation));
+        //调用setDisplayOrientation(int)以确保预览的正确方向。
+        int orientation = calcDisplayOrientation(mDisplayOrientation);
+        CameraLog.e(TAG, "openCamera, orientation: %d", orientation);
+        Log.e("wjc","orientation:"+orientation);
+        mCamera.setDisplayOrientation(orientation);
 
         mCallback.onCameraOpened();
     }
@@ -482,7 +487,7 @@ class Camera1 extends CameraViewImpl {
     private Size choosePictureSize() {
         if (mAspectRatio.equals(Constants.DEFAULT_ASPECT_RATIO)) {
             SortedSet<Size> sizes = mPictureSizes.sizes(mAspectRatio);
-            Size[] preferedSizes = new Size[] {new Size(1920, 1080), new Size(1280, 720)};//几个比较合适的输出大小
+            Size[] preferedSizes = new Size[]{new Size(1920, 1080), new Size(1280, 720)};//几个比较合适的输出大小
             for (Size size : preferedSizes) {
                 if (sizes.contains(size)) {
                     return size;
@@ -492,7 +497,7 @@ class Camera1 extends CameraViewImpl {
             return getMiddleSize(sizes);
         } else if (mAspectRatio.equals(Constants.SECOND_ASPECT_RATIO)) {
             SortedSet<Size> sizes = mPictureSizes.sizes(mAspectRatio);
-            Size[] preferedSizes = new Size[] {new Size(1440, 1080), new Size(1280, 960), new Size(1024, 768), new Size(800, 600)};//几个比较合适的输出大小
+            Size[] preferedSizes = new Size[]{new Size(1440, 1080), new Size(1280, 960), new Size(1024, 768), new Size(800, 600)};//几个比较合适的输出大小
             for (Size size : preferedSizes) {
                 if (sizes.contains(size)) {
                     return size;
@@ -528,11 +533,11 @@ class Camera1 extends CameraViewImpl {
     }
 
     /**
-     * Calculate display orientation
+     * 计算显示方向
      * https://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
-     *
+     * <p>
      * This calculation is used for orienting the preview
-     *
+     * <p>
      * Note: This is not the same calculation as the camera rotation
      *
      * @param screenOrientationDegrees Screen orientation in degrees
@@ -548,10 +553,10 @@ class Camera1 extends CameraViewImpl {
 
     /**
      * Calculate camera rotation
-     *
+     * <p>
      * This calculation is applied to the output JPEG either via Exif Orientation tag
      * or by actually transforming the bitmap. (Determined by vendor camera API implementation)
-     *
+     * <p>
      * Note: This is not the same calculation as the display orientation
      *
      * @param screenOrientationDegrees Screen orientation in degrees
@@ -652,7 +657,7 @@ class Camera1 extends CameraViewImpl {
                                         focusMode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE) ||
                                         focusMode.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO))
                                 ) {
-                            if(!parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+                            if (!parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
                                 return false; //cannot autoFocus
                             }
                             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
@@ -674,7 +679,7 @@ class Camera1 extends CameraViewImpl {
                                 CameraLog.e(TAG, "attachFocusTapListener, autofocus fail case 1", error);
                             }
                         } else if (parameters.getMaxNumMeteringAreas() > 0) {
-                            if(!parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+                            if (!parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
                                 return false; //cannot autoFocus
                             }
                             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
@@ -727,7 +732,7 @@ class Camera1 extends CameraViewImpl {
                         Camera.Parameters params = camera.getParameters();//数据上报中红米Note3在这里可能crash
                         if (params != null && !params.getFocusMode().equalsIgnoreCase(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
                             //之前这里并没有考虑相机是否支持FOCUS_MODE_CONTINUOUS_PICTURE，可能是因为这个原因导致部分三星机型上调用后面的setParameters失败
-                            if(params.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                            if (params.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
                                 params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
                                 params.setFocusAreas(null);
                                 params.setMeteringAreas(null);

@@ -16,63 +16,50 @@
 
 package com.android.wizcamera;
 
-import android.app.Dialog;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.media.ExifInterface;
-import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.wizcamera.utils.FileUtil;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.io.File;
 import java.io.IOException;
 
-@Deprecated
-public class PictureDialogFragment extends DialogFragment {
+public class PicturePreviewFragment extends Fragment {
 
     private static final String ARG_FILE_PATH = "file_path";
+    private String filePath;
 
-    private SimpleDraweeView mImageView;
-
-    public static PictureDialogFragment newInstance(String filePath) {
-        PictureDialogFragment fragment = new PictureDialogFragment();
+    public static PicturePreviewFragment newInstance(String filePath) {
+        PicturePreviewFragment fragment = new PicturePreviewFragment();
         Bundle args = new Bundle();
         args.putString(ARG_FILE_PATH, filePath);
         fragment.setArguments(args);
         return fragment;
     }
 
-    @NonNull
+    @Nullable
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        View contentView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_picture, null);
-        Dialog dialog = new Dialog(getContext());
-        dialog.setCancelable(true);
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.setContentView(contentView);
-
-        //make dialog fullscreen
-        Window window = dialog.getWindow();
-        window.getDecorView().setPadding(0, 0, 0, 0);//消除边距
-        WindowManager.LayoutParams layoutParams = window.getAttributes();
-        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-        layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
-        window.setAttributes(layoutParams);
-
-        final Bundle args = getArguments();
-        String filePath = args.getString(ARG_FILE_PATH);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View contentView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_picture, container, false);
+        if (getArguments() != null && getArguments().containsKey(ARG_FILE_PATH)) {
+            filePath = getArguments().getString(ARG_FILE_PATH);
+        }
+        Log.e("wjc", "filePath:" + filePath);
         Uri uri = Uri.fromFile(new File(filePath));
-        mImageView = (SimpleDraweeView) contentView.findViewById(R.id.image);
+        SimpleDraweeView mImageView = (SimpleDraweeView) contentView.findViewById(R.id.image);
         mImageView.setImageURI(uri);
 
         ((TextView) contentView.findViewById(R.id.info)).setText(readPictureExif(filePath));
-        return dialog;
+        return contentView;
     }
 
     private String readPictureExif(String filePath) {
@@ -93,11 +80,12 @@ public class PictureDialogFragment extends DialogFragment {
                     .append("\n flash=").append(flash)
                     .append("\n imageLength=").append(imageLength)
                     .append("\n imageWidth=").append(imageWidth)
+                    .append("\n size=").append(FileUtil.getPrintSize(new File(filePath).length()))
                     .toString();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
+
 }
