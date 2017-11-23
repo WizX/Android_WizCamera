@@ -18,158 +18,138 @@ package com.wizcamera;
 
 import android.util.Log;
 
-/**
- * 用于日志模块的日志输出 (参照FB RN源码模式)
- * <p>
- * Created by javayhu on 8/19/17.
- */
 public class CameraLog {
 
-    public static final int VERBOSE = Log.VERBOSE;
-
-    public static final int DEBUG = Log.DEBUG;
-
-    public static final int INFO = Log.INFO;
-
-    public static final int WARN = Log.WARN;
-
-    public static final int ERROR = Log.ERROR;
-
-    public static final int ASSERT = Log.ASSERT;
-
-
-
-
     public static void v(String tag, String msg) {
-            Log.v(tag, msg);
+        Log.v(tag, msg);
     }
 
     public static void v(String tag, String msg, Object arg1) {
-            Log.v(tag, formatString(msg, arg1));
+        Log.v(tag, formatString(msg, arg1));
     }
 
     public static void v(String tag, String msg, Object arg1, Object arg2) {
-            Log.v(tag, formatString(msg, arg1, arg2));
+        Log.v(tag, formatString(msg, arg1, arg2));
     }
 
     public static void v(String tag, String msg, Object arg1, Object arg2, Object arg3) {
-            Log.v(tag, formatString(msg, arg1, arg2, arg3));
+        Log.v(tag, formatString(msg, arg1, arg2, arg3));
     }
 
     public static void v(String tag, String msg, Object arg1, Object arg2, Object arg3,
                          Object arg4) {
-            Log.v(tag, formatString(msg, arg1, arg2, arg3, arg4));
+        Log.v(tag, formatString(msg, arg1, arg2, arg3, arg4));
     }
 
     public static void v(Class<?> cls, String msg) {
-            Log.v(getTag(cls), msg);
+        Log.v(getTag(cls), msg);
     }
 
     public static void v(Class<?> cls, String msg, Object arg1) {
-            Log.v(getTag(cls), formatString(msg, arg1));
+        Log.v(getTag(cls), formatString(msg, arg1));
     }
 
     public static void v(Class<?> cls, String msg, Object arg1, Object arg2) {
-            Log.v(getTag(cls), formatString(msg, arg1, arg2));
+        Log.v(getTag(cls), formatString(msg, arg1, arg2));
     }
 
     public static void v(Class<?> cls, String msg, Object arg1, Object arg2, Object arg3) {
-            v(cls, formatString(msg, arg1, arg2, arg3));
+        v(cls, formatString(msg, arg1, arg2, arg3));
     }
 
     public static void v(Class<?> cls, String msg, Object arg1, Object arg2, Object arg3,
                          Object arg4) {
-            Log.v(getTag(cls), formatString(msg, arg1, arg2, arg3, arg4));
+        Log.v(getTag(cls), formatString(msg, arg1, arg2, arg3, arg4));
     }
 
     public static void v(String tag, String msg, Object... args) {
-            Log.v(tag, formatString(msg, args));
+        Log.v(tag, formatString(msg, args));
     }
 
     public static void v(String tag, Throwable tr, String msg, Object... args) {
-            Log.v(tag, formatString(msg, args), tr);
+        Log.v(tag, formatString(msg, args), tr);
     }
 
     public static void v(Class<?> cls, String msg, Object... args) {
-            Log.v(getTag(cls), formatString(msg, args));
+        Log.v(getTag(cls), formatString(msg, args));
     }
 
     public static void v(Class<?> cls, Throwable tr, String msg, Object... args) {
-            Log.v(getTag(cls), formatString(msg, args), tr);
+        Log.v(getTag(cls), formatString(msg, args), tr);
     }
 
     public static void v(String tag, String msg, Throwable tr) {
-            Log.v(tag, msg, tr);
+        Log.v(tag, msg, tr);
     }
 
     public static void v(Class<?> cls, String msg, Throwable tr) {
-            Log.v(getTag(cls), msg, tr);
+        Log.v(getTag(cls), msg, tr);
     }
 
     public static void d(String tag, String msg) {
-            Log.d(tag, msg);
+        Log.d(tag, msg);
     }
 
     public static void d(String tag, String msg, Object arg1) {
-            Log.d(tag, formatString(msg, arg1));
+        Log.d(tag, formatString(msg, arg1));
     }
 
     public static void d(String tag, String msg, Object arg1, Object arg2) {
-            Log.d(tag, formatString(msg, arg1, arg2));
+        Log.d(tag, formatString(msg, arg1, arg2));
     }
 
     public static void d(String tag, String msg, Object arg1, Object arg2, Object arg3) {
-            Log.d(tag, formatString(msg, arg1, arg2, arg3));
+        Log.d(tag, formatString(msg, arg1, arg2, arg3));
     }
 
     public static void d(String tag, String msg, Object arg1, Object arg2, Object arg3,
                          Object arg4) {
-            Log.d(tag, formatString(msg, arg1, arg2, arg3, arg4));
+        Log.d(tag, formatString(msg, arg1, arg2, arg3, arg4));
     }
 
     public static void d(Class<?> cls, String msg) {
-            Log.d(getTag(cls), msg);
+        Log.d(getTag(cls), msg);
     }
 
     public static void d(Class<?> cls, String msg, Object arg1) {
-            Log.d(getTag(cls), formatString(msg, arg1));
+        Log.d(getTag(cls), formatString(msg, arg1));
     }
 
     public static void d(Class<?> cls, String msg, Object arg1, Object arg2) {
-            Log.d(getTag(cls), formatString(msg, arg1, arg2));
+        Log.d(getTag(cls), formatString(msg, arg1, arg2));
     }
 
     public static void d(Class<?> cls, String msg, Object arg1, Object arg2, Object arg3) {
-            Log.d(getTag(cls), formatString(msg, arg1, arg2, arg3));
+        Log.d(getTag(cls), formatString(msg, arg1, arg2, arg3));
     }
 
     public static void d(Class<?> cls, String msg, Object arg1, Object arg2, Object arg3,
                          Object arg4) {
-            Log.d(getTag(cls), formatString(msg, arg1, arg2, arg3, arg4));
+        Log.d(getTag(cls), formatString(msg, arg1, arg2, arg3, arg4));
     }
 
     public static void d(String tag, String msg, Object... args) {
-            d(tag, formatString(msg, args));
+        d(tag, formatString(msg, args));
     }
 
     public static void d(String tag, Throwable tr, String msg, Object... args) {
-            d(tag, formatString(msg, args), tr);
+        d(tag, formatString(msg, args), tr);
     }
 
     public static void d(Class<?> cls, String msg, Object... args) {
-            Log.d(getTag(cls), formatString(msg, args));
+        Log.d(getTag(cls), formatString(msg, args));
     }
 
     public static void d(Class<?> cls, Throwable tr, String msg, Object... args) {
-            Log.d(getTag(cls), formatString(msg, args), tr);
+        Log.d(getTag(cls), formatString(msg, args), tr);
     }
 
     public static void d(String tag, String msg, Throwable tr) {
-            Log.d(tag, msg, tr);
+        Log.d(tag, msg, tr);
     }
 
     public static void d(Class<?> cls, String msg, Throwable tr) {
-            Log.d(getTag(cls), msg, tr);
+        Log.d(getTag(cls), msg, tr);
     }
 
     public static void i(String tag, String msg) {
@@ -181,157 +161,157 @@ public class CameraLog {
     }
 
     public static void i(String tag, String msg, Object arg1, Object arg2) {
-            Log.i(tag, formatString(msg, arg1, arg2));
+        Log.i(tag, formatString(msg, arg1, arg2));
     }
 
     public static void i(String tag, String msg, Object arg1, Object arg2, Object arg3) {
-            Log.i(tag, formatString(msg, arg1, arg2, arg3));
+        Log.i(tag, formatString(msg, arg1, arg2, arg3));
     }
 
     public static void i(String tag, String msg, Object arg1, Object arg2, Object arg3,
                          Object arg4) {
-            Log.i(tag, formatString(msg, arg1, arg2, arg3, arg4));
+        Log.i(tag, formatString(msg, arg1, arg2, arg3, arg4));
     }
 
     public static void i(Class<?> cls, String msg) {
-            Log.i(getTag(cls), msg);
+        Log.i(getTag(cls), msg);
     }
 
     public static void i(Class<?> cls, String msg, Object arg1) {
-            Log.i(getTag(cls), formatString(msg, arg1));
+        Log.i(getTag(cls), formatString(msg, arg1));
     }
 
     public static void i(Class<?> cls, String msg, Object arg1, Object arg2) {
-            Log.i(getTag(cls), formatString(msg, arg1, arg2));
+        Log.i(getTag(cls), formatString(msg, arg1, arg2));
     }
 
     public static void i(Class<?> cls, String msg, Object arg1, Object arg2, Object arg3) {
-            Log.i(getTag(cls), formatString(msg, arg1, arg2, arg3));
+        Log.i(getTag(cls), formatString(msg, arg1, arg2, arg3));
     }
 
     public static void i(Class<?> cls, String msg, Object arg1, Object arg2, Object arg3,
                          Object arg4) {
-            Log.i(getTag(cls), formatString(msg, arg1, arg2, arg3, arg4));
+        Log.i(getTag(cls), formatString(msg, arg1, arg2, arg3, arg4));
     }
 
     public static void i(String tag, String msg, Object... args) {
-            Log.i(tag, formatString(msg, args));
+        Log.i(tag, formatString(msg, args));
     }
 
     public static void i(String tag, Throwable tr, String msg, Object... args) {
-            Log.i(tag, formatString(msg, args), tr);
+        Log.i(tag, formatString(msg, args), tr);
     }
 
     public static void i(Class<?> cls, String msg, Object... args) {
-            Log.i(getTag(cls), formatString(msg, args));
+        Log.i(getTag(cls), formatString(msg, args));
     }
 
     public static void i(Class<?> cls, Throwable tr, String msg, Object... args) {
-            Log.i(getTag(cls), formatString(msg, args), tr);
+        Log.i(getTag(cls), formatString(msg, args), tr);
     }
 
     public static void i(String tag, String msg, Throwable tr) {
-            Log.i(tag, msg, tr);
+        Log.i(tag, msg, tr);
     }
 
     public static void i(Class<?> cls, String msg, Throwable tr) {
-            Log.i(getTag(cls), msg, tr);
+        Log.i(getTag(cls), msg, tr);
     }
 
     public static void w(String tag, String msg) {
-            Log.w(tag, msg);
+        Log.w(tag, msg);
     }
 
     public static void w(Class<?> cls, String msg) {
-            Log.w(getTag(cls), msg);
+        Log.w(getTag(cls), msg);
     }
 
     public static void w(String tag, String msg, Object... args) {
-            Log.w(tag, formatString(msg, args));
+        Log.w(tag, formatString(msg, args));
     }
 
     public static void w(String tag, Throwable tr, String msg, Object... args) {
-            Log.w(tag, formatString(msg, args), tr);
+        Log.w(tag, formatString(msg, args), tr);
     }
 
     public static void w(Class<?> cls, String msg, Object... args) {
-            Log.w(getTag(cls), formatString(msg, args));
+        Log.w(getTag(cls), formatString(msg, args));
     }
 
     public static void w(Class<?> cls, Throwable tr, String msg, Object... args) {
-            w(cls, formatString(msg, args), tr);
+        w(cls, formatString(msg, args), tr);
     }
 
     public static void w(String tag, String msg, Throwable tr) {
-            Log.w(tag, msg, tr);
+        Log.w(tag, msg, tr);
     }
 
     public static void w(Class<?> cls, String msg, Throwable tr) {
-            Log.w(getTag(cls), msg, tr);
+        Log.w(getTag(cls), msg, tr);
     }
 
     public static void e(String tag, String msg) {
-            Log.e(tag, msg);
+        Log.e(tag, msg);
     }
 
     public static void e(Class<?> cls, String msg) {
-            Log.e(getTag(cls), msg);
+        Log.e(getTag(cls), msg);
     }
 
     public static void e(String tag, String msg, Object... args) {
-            Log.e(tag, formatString(msg, args));
+        Log.e(tag, formatString(msg, args));
     }
 
     public static void e(String tag, Throwable tr, String msg, Object... args) {
-            Log.e(tag, formatString(msg, args), tr);
+        Log.e(tag, formatString(msg, args), tr);
     }
 
     public static void e(Class<?> cls, String msg, Object... args) {
-            Log.e(getTag(cls), formatString(msg, args));
+        Log.e(getTag(cls), formatString(msg, args));
     }
 
     public static void e(Class<?> cls, Throwable tr, String msg, Object... args) {
-            Log.e(getTag(cls), formatString(msg, args), tr);
+        Log.e(getTag(cls), formatString(msg, args), tr);
     }
 
     public static void e(String tag, String msg, Throwable tr) {
-            Log.e(tag, msg, tr);
+        Log.e(tag, msg, tr);
     }
 
     public static void e(Class<?> cls, String msg, Throwable tr) {
-            Log.e(getTag(cls), msg, tr);
+        Log.e(getTag(cls), msg, tr);
     }
 
     public static void wtf(String tag, String msg) {
-            Log.wtf(tag, msg);
+        Log.wtf(tag, msg);
     }
 
     public static void wtf(Class<?> cls, String msg) {
-            Log.wtf(getTag(cls), msg);
+        Log.wtf(getTag(cls), msg);
     }
 
     public static void wtf(String tag, String msg, Object... args) {
-            Log.wtf(tag, formatString(msg, args));
+        Log.wtf(tag, formatString(msg, args));
     }
 
     public static void wtf(String tag, Throwable tr, String msg, Object... args) {
-            Log.wtf(tag, formatString(msg, args), tr);
+        Log.wtf(tag, formatString(msg, args), tr);
     }
 
     public static void wtf(Class<?> cls, String msg, Object... args) {
-            Log.wtf(getTag(cls), formatString(msg, args));
+        Log.wtf(getTag(cls), formatString(msg, args));
     }
 
     public static void wtf(Class<?> cls, Throwable tr, String msg, Object... args) {
-            Log.wtf(getTag(cls), formatString(msg, args), tr);
+        Log.wtf(getTag(cls), formatString(msg, args), tr);
     }
 
     public static void wtf(String tag, String msg, Throwable tr) {
-            Log.wtf(tag, msg, tr);
+        Log.wtf(tag, msg, tr);
     }
 
     public static void wtf(Class<?> cls, String msg, Throwable tr) {
-            Log.wtf(getTag(cls), msg, tr);
+        Log.wtf(getTag(cls), msg, tr);
     }
 
     private static String formatString(String str, Object... args) {
