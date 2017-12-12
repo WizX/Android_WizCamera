@@ -18,23 +18,27 @@ package com.wizcamera;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 /**
  * 手动对焦的框框组件
  */
-@TargetApi(14)
 public class FocusMarkerView extends FrameLayout {
 
     private FrameLayout mFocusMarkerContainer;
     private ImageView mFill;
+    private ICameraFocusListener cameraFocusListener;
+
+    public void setCameraFocusListener(ICameraFocusListener cameraFocusListener) {
+        this.cameraFocusListener = cameraFocusListener;
+    }
 
     public FocusMarkerView(@NonNull Context context) {
         this(context, null);
@@ -46,8 +50,22 @@ public class FocusMarkerView extends FrameLayout {
 
         mFocusMarkerContainer = (FrameLayout) findViewById(R.id.focusMarkerContainer);
         mFill = (ImageView) findViewById(R.id.fill);
-
         mFocusMarkerContainer.setAlpha(0);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (cameraFocusListener != null) {
+            cameraFocusListener.clickFocus(event);
+        }
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            focus(event.getX(), event.getY());
+        }
+        return true;
+    }
+
+    public interface ICameraFocusListener {
+        void clickFocus(MotionEvent event);
     }
 
     public void focus(float mx, float my) {

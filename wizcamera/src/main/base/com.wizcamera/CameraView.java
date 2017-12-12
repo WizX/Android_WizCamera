@@ -29,7 +29,6 @@ import android.support.v4.os.ParcelableCompatCreatorCallbacks;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.FrameLayout;
 
 import java.lang.annotation.Retention;
@@ -117,18 +116,12 @@ public class CameraView extends FrameLayout {
         // Focus marker
         final FocusMarkerView mFocusMarkerView = new FocusMarkerView(getContext());
         addView(mFocusMarkerView);
-        mFocusMarkerView.setOnTouchListener(new OnTouchListener() {
+        mFocusMarkerView.setCameraFocusListener(new FocusMarkerView.ICameraFocusListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent motionEvent) {
-                int action = motionEvent.getAction();
-                if (action == MotionEvent.ACTION_UP) {
-                    mFocusMarkerView.focus(motionEvent.getX(), motionEvent.getY());
-                }
-
+            public void clickFocus(MotionEvent event) {
                 if (mPreviewImpl != null && mPreviewImpl.getView() != null) {
-                    mPreviewImpl.getView().dispatchTouchEvent(motionEvent);
+                    mPreviewImpl.getView().dispatchTouchEvent(event);
                 }
-                return true;
             }
         });
     }
